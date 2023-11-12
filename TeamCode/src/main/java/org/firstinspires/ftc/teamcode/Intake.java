@@ -29,7 +29,7 @@ public class Intake {
     private int liftUpperLimit = 4130;
     private int liftLowerLimit = 100;
 
-    private int level0target = -30;
+    private int level0target = -25;
 
     private int level1target = -4000;
 
