@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Drive {
     private DcMotor lf_drive = null;
     private DcMotor lr_drive  = null;
@@ -29,10 +31,7 @@ public class Drive {
         rr_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-        lf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lr_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rr_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runUsingEncoders();
 
 
     }
@@ -43,6 +42,9 @@ public class Drive {
     public void runUsingEncoders() {
         rr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
 
     public  void disableEncoders() {
@@ -121,6 +123,15 @@ public class Drive {
         lr_drive.setPower(leftPower);
         rf_drive.setPower(rightPower);
         rr_drive.setPower(rightPower);
+    }
+
+    public void printDriveTelemetry(Telemetry t) {
+        t.addData("LR Position", lr_drive.getCurrentPosition());
+        t.addData("LR Mode", lr_drive.getMode().toString());
+
+        t.addData("RR Position", rr_drive.getCurrentPosition());
+        t.addData("RR Mode", rr_drive.getMode().toString());
+
     }
 
 }

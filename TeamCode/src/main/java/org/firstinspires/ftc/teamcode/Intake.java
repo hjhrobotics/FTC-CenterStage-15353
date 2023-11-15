@@ -12,30 +12,41 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Intake {
 
-    private Servo gripper = null;
+    // --- Declare DC Motors here ---
+    private DcMotor lifted = null;
+    private DcMotor climber = null;
+    private DcMotor liftclimber = null;
 
+    // --- Declare Servos Here ---
+    private Servo gripper = null;
     private Servo rotategripper = null;
+
+    // -- Subsystem Variables ---
 
     private boolean gripperOpen = false;
 
-    private int liftLevel = 0;
+    private int currentLiftTarget = 0;
+    private String  liftRunmode = "manual"; //expect manual or encoder
+    private String liftTargetDirecton = "up"; //up or down
+    private boolean liftAvailable = true;
 
-    private DcMotor lifted = null;
 
-    private DcMotor climber = null;
 
-    private DcMotor liftclimber = null;
-
+    // Encoder Values used to limit lift from going too high or too low
+    //2023 Values, 2 stages, 117rpm motor
     private int liftUpperLimit = 4130;
-    private int liftLowerLimit = 100;
+    private int liftLowerLimit = 90;
 
-    private int level0target = -25;
+    //Encoder values for adjusting lift
+    private int liftGroundEncoderValue = 22;
+    private int liftMiddleLevelEncoderValue = 2200;
 
-    private int level1target = -4000;
+    private int pixelEncoderValueFlat = 140;
+    private int pixelEncoderValueUpright = 750;
 
-    private int level2target = -7750;
+    private int climberTopPosition = 63200;
+    private int climberLiftTopPosition = -300;
 
-    private int level3target = -10500;
 
     private int auton = -6000;
 
@@ -60,166 +71,160 @@ public class Intake {
         climber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-      //  gripper.setPosition(.5);
-        //rotategripper.setPosition(.27);
+        gripperDown();
+        closeGripper();
 
     }
 
-    public void removeLiftLimits() {
-        lifted.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
 
-    public String getMotorRunmode() {
-        return lifted.getMode().toString();
-    }
-
-    public int getLiftLevel() {
-        return liftLevel;
-    }
-
-    public void setLiftLevel(int level) {
-        liftLevel = level;
-    }
-
-
+    // --- Gripper Methods ---
     //Open and close the gripper
-    public void openGripper() {
-        gripper.setPosition(.5);
+    public void closeGripper() {
+        gripper.setPosition(.45);
         gripperOpen = true;
     }
 
-    public void closeGripper() {
-        gripper.setPosition(.75);
+    public void openGripper() {
+        gripper.setPosition(.52);
         gripperOpen = false;
     }
 
     public void gripperUp() {
-        rotategripper.setPosition(0);
+        rotategripper.setPosition(.55);
     }
 
     public void gripperDown() {
-        rotategripper.setPosition(1);
+        rotategripper.setPosition(.26);
     }
 
+    // --- Lift Methods ---
 
-    public void toggleGripper() {
-        if (gripperOpen) {
-            closeGripper();
+    public void toggleLiftOperationMode() {
+        //expect manual or encoder
+        if(liftRunmode == "encoder") {
+            liftRunmode = "manual";
         } else {
-            openGripper();
+            liftRunmode = "encoder";
         }
-        gripperOpen = !gripperOpen;
+
+    }
+    public void setLiftModeToEncoder() { liftRunmode = "encoder"; }
+    public void setLiftModeToManual() { liftRunmode = "manual"; }
+
+    public String getLiftOperationMode() {
+        return liftRunmode;
     }
 
     public void moveLift(double speed) {
-        if (speed > .8 || speed < -.8) {
-            lifted.setPower(speed);
-        } else {
-            lifted.setPower(0);
-        }
-
+        lifted.setPower(speed);
     }
-
     public void lowerLift(double speed) {
         if (lifted.getCurrentPosition() > liftLowerLimit) {
             lifted.setPower(speed);
         } else {
             lifted.setPower(0);
         }
-
-
     }
-
     public void raiseLift(double speed) {
         if (lifted.getCurrentPosition() < liftUpperLimit) {
             lifted.setPower(speed);
         } else {
             lifted.setPower(0);
         }
-
-
     }
-
     public void stopLift() {
         lifted.setPower(0);
     }
 
-    public void runClimber(double speed) {
-        double s = Range.clip(speed, -1, 1);
-        climber.setPower(s);
-    }
-
-    public void setLiftclimber(double speed) {
-        liftclimber.setPower(speed * .5);
+    //Use after running to position to reset runmode
+    public void liftRunWithEncoders() {
+        lifted.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public double getEncodedLift(){
         return lifted.getCurrentPosition();
     }
-
+    public int getCurrentLiftTarget() { return currentLiftTarget; }
+    public String getLiftMotorRunmode() {
+        return lifted.getMode().toString();
+    }
+    public String getLiftTargetDirecton() {
+        return liftTargetDirecton;
+    }
     public void liftToBottom() {
-        lifted.setTargetPosition(level0target);
-        setLiftLevel(0);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    public void liftLevel1() {
-        lifted.setTargetPosition(level1target);
-        setLiftLevel(1);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    public void liftLevel2() {
-        lifted.setTargetPosition(level2target);
-        setLiftLevel(2);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    public void liftLevel3() {
-        lifted.setTargetPosition(level3target);
-        setLiftLevel(3);
+        liftTargetDirecton = "down";
+        currentLiftTarget = liftGroundEncoderValue;
+        lifted.setTargetPosition(currentLiftTarget);
         lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void AUTONlevel() {
-        lifted.setTargetPosition(auton);
-        setLiftLevel(auton);
+    public void liftToMiddle() {
+        liftTargetDirecton = "up";
+        currentLiftTarget = liftMiddleLevelEncoderValue;
+        lifted.setTargetPosition(currentLiftTarget);
         lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void upOnePixelFlat() {
+        liftTargetDirecton = "up";
+        currentLiftTarget = lifted.getCurrentPosition() + pixelEncoderValueFlat;
+        lifted.setTargetPosition(currentLiftTarget);
+        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+    public void upOnePixelUpright() {
+        liftTargetDirecton = "up";
+        currentLiftTarget = lifted.getCurrentPosition() + pixelEncoderValueUpright;
+        lifted.setTargetPosition(currentLiftTarget);
+        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
 
 
     public  boolean liftBusy() { return  lifted.isBusy(); }
 
-
-    public int getLevel3Target(){
-        return level3target;
-
+    public void runClimber(double speed) {
+        double s = Range.clip(speed, -1, 1);
+        climber.setPower(s);
+    }
+    public void setLiftclimber(double speed) {
+        liftclimber.setPower(speed * .5);
     }
 
-    public int getLevel2Target(){
-        return level2target;
-
+    public void runClimberToTop() {
+        climber.setTargetPosition(climberTopPosition);
+        climber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-
-    public int getLevel1Target(){
-        return level1target;
-
+    public void climberRunWithEncoders() {
+        climber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-
-    public int getBottomTarget(){
-        return level0target;
-
+    public void runLiftClimberToTop() {
+        liftclimber.setTargetPosition(climberLiftTopPosition);
+        liftclimber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
+    public void climberLiftRunWithEncoders() { liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER); }
 
-    public int getauton(){
-        return auton;
+    public int getClimberTopPosition() { return climberTopPosition; }
+    public int getClimberLiftTopPosition() { return climberLiftTopPosition; }
+    public int getClimberPosition() { return climber.getCurrentPosition(); }
+    public int getLiftClimberPosition() { return liftclimber.getCurrentPosition(); }
 
-    }
 
     public void printIntakeTelemetry(Telemetry t) {
         t.addData("Lift Encoder Value", lifted.getCurrentPosition());
+        t.addData("Lift Runmode", getLiftMotorRunmode());
+        t.addData("Lift Op Mode", liftRunmode);
+        t.addData("Lift Target Position", currentLiftTarget);
+        t.addData("Lift Target Direction", liftTargetDirecton);
+
         t.addData("Climber Encoder Value", climber.getCurrentPosition());
         t.addData("Climb Lifter Encoder Value", liftclimber.getCurrentPosition());
-        t.addData("Lift Target Position", liftLevel);
+
         t.addData("Gripper Open", gripperOpen);
     }
 
 
+    public String getLiftLevel() {
+        return null;
+    }
 }
