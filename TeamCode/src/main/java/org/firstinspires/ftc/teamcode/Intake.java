@@ -39,16 +39,16 @@ public class Intake {
 
     //Encoder values for adjusting lift
     private int liftGroundEncoderValue = -22;
-    private int liftMiddleLevelEncoderValue = -2200;
+    private int liftMiddleLevelEncoderValue = -2750;
 
-    private int pixelEncoderValueFlat = -140;
+    private int pixelEncoderValueFlat = -75;
     private int pixelEncoderValueUpright = -750;
 
     private int climberTopPosition = 63200;
     private int climberLiftTopPosition = -300;
 
 
-    private int auton = -6000;
+    private int auton = -7500;
 
     // private DigitalChannel armLimitSwitch = null;
     // private DigitalChannel armLowerLimit = null;

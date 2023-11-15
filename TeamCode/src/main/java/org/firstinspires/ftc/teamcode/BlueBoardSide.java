@@ -174,6 +174,13 @@ public class BlueBoardSide extends OpMode {
             case 5:
                 intake.closeGripper();
                 if(runtime.seconds() > commandStartTime) {
+                    intake.gripperUp();
+                    autoCase = 6;
+                }
+                break;
+            case 106:
+                intake.closeGripper();
+                if(runtime.seconds() > commandStartTime) {
                     autoCase = 6;
                 }
                 break;
@@ -214,7 +221,7 @@ public class BlueBoardSide extends OpMode {
             case 100:
                 //set board target, square up to board
                 leftEncoderTarget = drive.getLeftEncoderValue() + 1200;
-                rightEncoderTarget = drive.getRightEncoderValue() + 1400;
+                rightEncoderTarget = drive.getRightEncoderValue() + 1600;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 101;
@@ -246,8 +253,8 @@ public class BlueBoardSide extends OpMode {
                 break;
             case 124:
                 //Move to board -- set targets
-                leftEncoderTarget = drive.getLeftEncoderValue() + 50;
-                rightEncoderTarget = drive.getRightEncoderValue() + 50;
+                leftEncoderTarget = drive.getLeftEncoderValue() + 13;
+                rightEncoderTarget = drive.getRightEncoderValue() + 15;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 125;
@@ -272,8 +279,8 @@ public class BlueBoardSide extends OpMode {
                 break;
             case 127:
                 //Move away from board -- set targets
-                leftEncoderTarget = drive.getLeftEncoderValue() - 50;
-                rightEncoderTarget = drive.getRightEncoderValue() - 50;
+                leftEncoderTarget = drive.getLeftEncoderValue() - 13;
+                rightEncoderTarget = drive.getRightEncoderValue() - 15;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 128;
