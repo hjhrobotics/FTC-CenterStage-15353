@@ -65,11 +65,11 @@ public class Intake {
 
         lifted.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         climber.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        liftclimber.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       // liftclimber.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         lifted.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         climber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      //  liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         gripperDown();
         closeGripper();
@@ -187,10 +187,10 @@ public class Intake {
         double s = Range.clip(speed, -1, 1);
         climber.setPower(s);
     }
-    public void setLiftclimber(double speed) {
+   /* public void setLiftclimber(double speed) {
         liftclimber.setPower(speed * .5);
     }
-
+*/
     public void runClimberToTop() {
         climber.setTargetPosition(climberTopPosition);
         climber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
