@@ -34,15 +34,15 @@ public class Intake {
 
     // Encoder Values used to limit lift from going too high or too low
     //2023 Values, 2 stages, 117rpm motor
-    private int liftUpperLimit = 4130;
-    private int liftLowerLimit = 90;
+    private int liftUpperLimit = -4130;
+    private int liftLowerLimit = -90;
 
     //Encoder values for adjusting lift
-    private int liftGroundEncoderValue = 22;
-    private int liftMiddleLevelEncoderValue = 2200;
+    private int liftGroundEncoderValue = -22;
+    private int liftMiddleLevelEncoderValue = -2200;
 
-    private int pixelEncoderValueFlat = 140;
-    private int pixelEncoderValueUpright = 750;
+    private int pixelEncoderValueFlat = -140;
+    private int pixelEncoderValueUpright = -750;
 
     private int climberTopPosition = 63200;
     private int climberLiftTopPosition = -300;

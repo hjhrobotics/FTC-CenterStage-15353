@@ -155,7 +155,7 @@ public class BlueBoardSide extends OpMode {
             case 4:
                 //Enable the lift so it moves
                 intake.moveLift(.4);
-                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     //Close the gripper on the Gold
 
@@ -230,7 +230,7 @@ public class BlueBoardSide extends OpMode {
                 break;
             case 102:
                 intake.moveLift(.6);
-                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     intake.gripperUp();
                     commandStartTime = runtime.seconds() + 2;
@@ -296,7 +296,7 @@ public class BlueBoardSide extends OpMode {
                 break;
             case 130:
                 intake.moveLift(-.5);
-                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     autoCase = 131;
                 }
