@@ -80,21 +80,21 @@ public class Intake {
     // --- Gripper Methods ---
     //Open and close the gripper
     public void closeGripper() {
-        gripper.setPosition(.45);
+        gripper.setPosition(.3);
         gripperOpen = true;
     }
 
     public void openGripper() {
-        gripper.setPosition(.52);
+        gripper.setPosition(.5);
         gripperOpen = false;
     }
 
     public void gripperUp() {
-        rotategripper.setPosition(.55);
+        rotategripper.setPosition(0);
     }
 
     public void gripperDown() {
-        rotategripper.setPosition(.26);
+        rotategripper.setPosition(1);
     }
 
     // --- Lift Methods ---
