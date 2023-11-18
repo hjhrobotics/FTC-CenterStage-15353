@@ -35,9 +35,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@Autonomous(name="Blue-BoardSide", group="Iterative Opmode")
+@Autonomous(name="Place", group="Iterative Opmode")
 //@Disabled
-public class BlueBoardSide extends OpMode {
+public class BluePlace extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drive drive;
@@ -195,7 +195,7 @@ public class BlueBoardSide extends OpMode {
                 drive.straightDrive(-.5);
                 if(drive.getRightEncoderValue() <= rightEncoderTarget && drive.getLeftEncoderValue() <= leftEncoderTarget) {
                     drive.straightDrive(0);
-                    autoCase = 8;
+                    autoCase = 999;
                 }
                 break;
             case  8:

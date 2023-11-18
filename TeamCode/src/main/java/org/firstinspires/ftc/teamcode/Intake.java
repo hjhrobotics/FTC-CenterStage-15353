@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -151,7 +148,7 @@ public class Intake {
     public String getLiftTargetDirecton() {
         return liftTargetDirecton;
     }
-    public void liftToBottom() {
+    public void liftToBottom(boolean right_bumper) {
         liftTargetDirecton = "down";
         currentLiftTarget = liftGroundEncoderValue;
         lifted.setTargetPosition(currentLiftTarget);

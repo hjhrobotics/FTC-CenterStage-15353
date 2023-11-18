@@ -29,26 +29,32 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-//@Autonomous(name="Auto Test", group="Iterative Opmode")
-@TeleOp(name="Teleop-v1", group="Iterative Opmode")
+@Autonomous(name="lift", group="Iterative Opmode")
 //@Disabled
-public class TeleopV1 extends OpMode {
+public class LiftToBottom extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drive drive;
     private Sensors sensors;
     private Intake intake;
-    private Vision vision;
 
     private Orientation angles = null;
 
+    public Vision vision = null;
+
+    private int autoCase = 1;
+    private int rightEncoderTarget = 0;
+    private int leftEncoderTarget = 0;
+    private int gyroTarget = 0;
+    private String markerLocation = "";
+
+    private double commandStartTime = 0.0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -60,8 +66,9 @@ public class TeleopV1 extends OpMode {
         drive = new Drive(hardwareMap);
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap);
-        intake.setLiftModeToManual();
         vision = new Vision();
+
+        intake.closeGripper();
 
         try {
             sensors.initGyro();
@@ -70,6 +77,13 @@ public class TeleopV1 extends OpMode {
             telemetry.addData("Gyro", "Error: " + e.toString());
         }
 
+        try {
+            vision.createOpenCvPipeline(hardwareMap, "BLUE");
+            vision.startCvStream();
+            telemetry.addData("Vision", "Initialized");
+        } catch (Exception e) {
+            telemetry.addData("Vision", "Error: " + e.toString());
+        }
     }
 
     /*
@@ -77,6 +91,9 @@ public class TeleopV1 extends OpMode {
      */
     @Override
     public void init_loop() {
+
+        telemetry.addData("Marker Location", vision.getCvMarkerLocation());
+        telemetry.update();
     }
 
     /*
@@ -85,6 +102,8 @@ public class TeleopV1 extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+        //markerLocation = vision.getCvMarkerLocation();
+        markerLocation = "CENTER";
     }
 
     /*
@@ -92,79 +111,34 @@ public class TeleopV1 extends OpMode {
      */
     @Override
     public void loop() {
-
-        //GTA Drive Code
-        if (gamepad1.right_bumper) {
-
-            drive.strafe(-1);
-        } else if (gamepad1.left_bumper) {
-            drive.strafe(1);
-        } else if (gamepad1.left_trigger > .2) {
-            drive.teleopDrive(-gamepad1.left_trigger, gamepad1.right_stick_x);
-        } else {
-            drive.teleopDrive(gamepad1.right_trigger, gamepad1.right_stick_x);
-        }
-        //Fine control robot
-        if (gamepad1.a) {
-            drive.straightDrive(.3);
-        } else if (gamepad1.b) {
-            drive.strafe(-.3);
-        } else if (gamepad1.x) {
-            drive.strafe(.3);
-        } else if (gamepad1.y) {
-            drive.straightDrive(-.3);
-        }
-
-        if(gamepad2.a) {
-            intake.openGripper();
-
-        }
-        if(gamepad2.b){
-            intake.closeGripper();
-        }
-        if(gamepad2.x) {
-            intake.gripperDown();
-
-        }
-        if(gamepad2.y){
-            intake.gripperUp();
-        }
-
-
-        intake.runClimber(-gamepad2.right_stick_y);
-
-
-        if(gamepad2.left_stick_y < -.15) {
-            intake.raiseLift(-gamepad2.left_stick_y);
-        } else if(gamepad2.left_stick_y > .15) {
-            intake.lowerLift(-gamepad2.left_stick_y);
-        } else {
-            intake.moveLift(0);
-        }
-
-
-
-/*
-        if(gamepad2.left_trigger > .08) {
-            intake.setLiftclimber(-gamepad2.left_trigger);
-        } else if(gamepad2.right_trigger > .08) {
-            intake.setLiftclimber(gamepad2.right_trigger);
-        } else {
-            intake.setLiftclimber(0);
-        }
-
-*/
-
         //Get gyro reading
         angles = sensors.readGyroAngle();
 
+        switch (autoCase) {
+            case 1:
+                //Lift and gripper down to start teleop
+                intake.gripperDown();
+                //Set the target for the lift to the bottom
+                intake.liftToBottom(gamepad2.right_bumper);
+                autoCase = 999;
+                break;
+            default:
+                drive.teleopDrive(0, 0);
+                intake.moveLift(0);
+                break;
 
-        telemetry.addData("Gyro", sensors.getGyroZ(angles));
+        }
 
-        drive.printDriveTelemetry(telemetry);
+        telemetry.addData("Auto Case", autoCase);
+        telemetry.addData("Gyro Z", sensors.getGyroZ(angles));
+        telemetry.addData("Marker Location", markerLocation);
+
+        telemetry.addData("Left Encoder Target", leftEncoderTarget);
+        telemetry.addData("Right Encoder Target", rightEncoderTarget);
+        telemetry.addData("Gyro Target", gyroTarget);
+
+      //  drive.printDriveTelemetry(telemetry);
         intake.printIntakeTelemetry(telemetry);
-        telemetry.update();
-
 
     }
 

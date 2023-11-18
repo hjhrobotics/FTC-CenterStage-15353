@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -298,7 +297,7 @@ public class RedBoardSide extends OpMode {
                 //Lift and gripper down to start teleop
                 intake.gripperDown();
                 //Set the target for the lift to the bottom
-                intake.liftToBottom();
+                intake.liftToBottom(gamepad2.right_bumper);
                 autoCase = 130;
                 break;
             case 130:
