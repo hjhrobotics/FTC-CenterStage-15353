@@ -37,7 +37,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 //@Autonomous(name="Auto Test", group="Iterative Opmode")
 @TeleOp(name="Test Teleop", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class TestTeleop extends OpMode {
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();

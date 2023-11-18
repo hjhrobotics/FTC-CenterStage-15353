@@ -39,7 +39,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.List;
 
 @Autonomous(name="April Tag Test", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class Test_AprilTags extends OpMode {
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();

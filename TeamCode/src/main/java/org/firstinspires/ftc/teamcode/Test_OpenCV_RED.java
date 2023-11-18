@@ -30,12 +30,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous(name="RED OpenCV Test", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class Test_OpenCV_RED extends OpMode {
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();

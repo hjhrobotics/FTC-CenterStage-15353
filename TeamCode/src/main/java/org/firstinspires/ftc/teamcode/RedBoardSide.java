@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -37,7 +38,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @Autonomous(name="Red-BoardSide", group="Iterative Opmode")
 //@Disabled
-public class REDBoardSide extends OpMode {
+public class RedBoardSide extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drive drive;
@@ -154,7 +155,7 @@ public class REDBoardSide extends OpMode {
             case 4:
                 //Enable the lift so it moves
                 intake.moveLift(.4);
-                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     //Close the gripper on the Gold
 
@@ -171,6 +172,13 @@ public class REDBoardSide extends OpMode {
                 }
                 break;
             case 5:
+                intake.closeGripper();
+                if(runtime.seconds() > commandStartTime) {
+                    intake.gripperUp();
+                    autoCase = 6;
+                }
+                break;
+            case 106:
                 intake.closeGripper();
                 if(runtime.seconds() > commandStartTime) {
                     autoCase = 6;
@@ -196,7 +204,7 @@ public class REDBoardSide extends OpMode {
                 //Set gyro Target
                 gyroTarget = -55;
                 drive.tankDrive(.4, -.4);
-                if(sensors.getGyroZ(angles) < gyroTarget) {
+                if(sensors.getGyroZ(angles) <= gyroTarget) {
                     //case 100 is the finish of the process
                     autoCase = 100;
                 }
@@ -212,15 +220,15 @@ public class REDBoardSide extends OpMode {
         //************************************** Start of Final process to place ********************************
             case 100:
                 //set board target, square up to board
-                leftEncoderTarget = drive.getLeftEncoderValue() + 1400;
-                rightEncoderTarget = drive.getRightEncoderValue() + 1200;
+                leftEncoderTarget = drive.getLeftEncoderValue() + 1200;
+                rightEncoderTarget = drive.getRightEncoderValue() + 1600;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 101;
                 break;
             case 101:
                 //Drive to the board, set the lift target for middle when done
-                drive.tankDrive(.45, .4);
+                drive.tankDrive(.4, .45);
                 if(drive.getRightEncoderValue() >= rightEncoderTarget && drive.getLeftEncoderValue() >= leftEncoderTarget) {
                     drive.straightDrive(0);
                     intake.liftToMiddle();
@@ -229,7 +237,7 @@ public class REDBoardSide extends OpMode {
                 break;
             case 102:
                 intake.moveLift(.6);
-                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     intake.gripperUp();
                     commandStartTime = runtime.seconds() + 2;
@@ -245,8 +253,8 @@ public class REDBoardSide extends OpMode {
                 break;
             case 124:
                 //Move to board -- set targets
-                leftEncoderTarget = drive.getLeftEncoderValue() + 50;
-                rightEncoderTarget = drive.getRightEncoderValue() + 50;
+                leftEncoderTarget = drive.getLeftEncoderValue() + 13;
+                rightEncoderTarget = drive.getRightEncoderValue() + 15;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 125;
@@ -271,8 +279,8 @@ public class REDBoardSide extends OpMode {
                 break;
             case 127:
                 //Move away from board -- set targets
-                leftEncoderTarget = drive.getLeftEncoderValue() - 50;
-                rightEncoderTarget = drive.getRightEncoderValue() - 50;
+                leftEncoderTarget = drive.getLeftEncoderValue() - 13;
+                rightEncoderTarget = drive.getRightEncoderValue() - 15;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 128;
@@ -295,14 +303,14 @@ public class REDBoardSide extends OpMode {
                 break;
             case 130:
                 intake.moveLift(-.5);
-                if (intake.getEncodedLift() <= intake.getCurrentLiftTarget()) {
+                if (intake.getEncodedLift() >= intake.getCurrentLiftTarget()) {
                     intake.stopLift();
                     autoCase = 131;
                 }
                 break;
             case 131:
-                drive.tankDrive(-.6, 0);
-                if(sensors.getGyroZ(angles) >= 67) {
+                drive.tankDrive(0, -.6);
+                if(sensors.getGyroZ(angles) <= -67) {
                     drive.tankDrive(0, 0);
                     autoCase = 132;
                 }
@@ -322,7 +330,7 @@ public class REDBoardSide extends OpMode {
         telemetry.addData("Right Encoder Target", rightEncoderTarget);
         telemetry.addData("Gyro Target", gyroTarget);
 
-        drive.printDriveTelemetry(telemetry);
+      //  drive.printDriveTelemetry(telemetry);
         intake.printIntakeTelemetry(telemetry);
 
     }

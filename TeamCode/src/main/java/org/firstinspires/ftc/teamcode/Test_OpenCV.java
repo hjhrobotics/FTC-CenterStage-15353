@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -38,7 +39,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.List;
 
 @Autonomous(name="OpenCV Test", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class Test_OpenCV extends OpMode {
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();

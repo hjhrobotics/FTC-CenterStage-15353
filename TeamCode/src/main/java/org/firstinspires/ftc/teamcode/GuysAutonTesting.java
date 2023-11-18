@@ -34,8 +34,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@Autonomous(name="AutonGuys", group="Iterative Opmode")
-//@Disabled
+//@Autonomous(name="AutonGuys", group="Iterative Opmode")
+
 public class GuysAutonTesting extends OpMode {
     // Declare OpMode members.
     //private ElapsedTime runtime = new ElapsedTime();
