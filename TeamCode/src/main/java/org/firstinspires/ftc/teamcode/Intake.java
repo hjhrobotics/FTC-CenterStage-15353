@@ -10,66 +10,67 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Intake {
 
     // --- Declare DC Motors here ---
-    private DcMotor lifted = null;
-    private DcMotor climber = null;
-    private DcMotor liftclimber = null;
+    private DcMotor actuator = null;
+    private DcMotor chain = null;
 
     // --- Declare Servos Here ---
-    private Servo gripper = null;
-    private Servo rotategripper = null;
+    private Servo gripper = null; //Left Servo
+    private Servo gripper2 = null; //RightServo
+    private Servo intakeRotateServo = null;
 
     // -- Subsystem Variables ---
 
     private boolean gripperOpen = false;
 
-    private int currentLiftTarget = 0;
-    private String  liftRunmode = "manual"; //expect manual or encoder
-    private String liftTargetDirecton = "up"; //up or down
-    private boolean liftAvailable = true;
+    private int currentActuatorTarget = 0;
+    private int currentChainTarget = 0;
 
-
+    private String chainTargetDirecton = "UP"; //up or down
+    private String actuatorTargetDirection = "OUT";
 
     // Encoder Values used to limit lift from going too high or too low
     //2023 Values, 2 stages, 117rpm motor
-    private int liftUpperLimit = -4130;
-    private int liftLowerLimit = -90;
+    private int actuatorMiddlePosition = 1500;
+    private int actuatorInnerLimit = 175;
+    private int actuatorOuterLimit = 2350;
 
-    //Encoder values for adjusting lift
-    private int liftGroundEncoderValue = -22;
-    private int liftMiddleLevelEncoderValue = -2750;
+    private int chainGroundPosition = 0;
+    private int chainPlacePosition = 2175;
+    private int chainClimbPosition = 3609;
 
-    private int pixelEncoderValueFlat = -75;
-    private int pixelEncoderValueUpright = -750;
+    private int chainUpperLimit = 0;
+    private int chainLowerLimit = 0;
 
-    private int climberTopPosition = 63200;
-    private int climberLiftTopPosition = -300;
+    private double leftServoGripPosition = .7;
+    private double leftServoReleasePosition = 1;
+    private double rightServoGripPosition = 1;
+    private double rightServoReleasePosition = .7;
+    private double rotateServoInPosition = .66;
+    private double rotateServoGrabPosition = .66;
+    private double rotateServoPlacePosition = .58;
 
 
-    private int auton = -7500;
 
-    // private DigitalChannel armLimitSwitch = null;
-    // private DigitalChannel armLowerLimit = null;
 
 
     public Intake(HardwareMap h) {
 
         gripper = h.get(Servo.class, "gripper");
-        rotategripper = h.get(Servo.class, "rotategripper");
+        gripper2 = h.get(Servo.class, "Gripper2");
+        intakeRotateServo = h.get(Servo.class, "intakeRotate");
 
-        lifted = h.get(DcMotor.class, "lifted");
-        climber = h.get(DcMotor.class, "climber");
-        liftclimber = h.get(DcMotor.class, "liftclimber");
+        actuator = h.get(DcMotor.class, "actuator");
+        chain = h.get(DcMotor.class, "chain");
 
-        lifted.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        climber.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        actuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        chain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
        // liftclimber.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        lifted.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        climber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      //  liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        actuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        chain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        gripperDown();
         closeGripper();
+        gripperGrabPosition();
 
     }
 
@@ -77,151 +78,203 @@ public class Intake {
     // --- Gripper Methods ---
     //Open and close the gripper
     public void closeGripper() {
-        gripper.setPosition(.7);
-        gripperOpen = true;
-    }
-
-    public void openGripper() {
-        gripper.setPosition(.4);
+        gripper.setPosition(leftServoGripPosition);
+        gripper2.setPosition(rightServoGripPosition);
         gripperOpen = false;
     }
 
-    public void gripperUp() {
-        rotategripper.setPosition(0);
+    public void openGripper() {
+        gripper.setPosition(leftServoReleasePosition);
+        gripper2.setPosition(rightServoReleasePosition);
+        gripperOpen = true;
+    }
+    public void openLeftGripper() {
+        gripper.setPosition(leftServoReleasePosition);
+        gripperOpen = true;
+    }
+    public void openRightGripper() {
+        gripper2.setPosition(rightServoReleasePosition);
+        gripperOpen = true;
     }
 
-    public void gripperDown() {
-        rotategripper.setPosition(1);
+    public void gripperPlacePosition() {
+        intakeRotateServo.setPosition(rotateServoPlacePosition);
     }
 
-    // --- Lift Methods ---
+    public void gripperGrabPosition() {
+        intakeRotateServo.setPosition(rotateServoGrabPosition);
+    }
 
-    public void toggleLiftOperationMode() {
-        //expect manual or encoder
-        if(liftRunmode == "encoder") {
-            liftRunmode = "manual";
+    public void gripperInnerPosition() {
+        intakeRotateServo.setPosition(rotateServoInPosition);
+    }
+
+    // --- Actuator Methods ---
+    //Move method oly for testing/resetting
+    public void moveActuator(double speed) {
+        actuator.setPower(speed);
+    }
+    public void moveActuatorIn(double speed) {
+        if (actuator.getCurrentPosition() > actuatorInnerLimit) {
+            actuator.setPower(speed);
         } else {
-            liftRunmode = "encoder";
-        }
-
-    }
-    public void setLiftModeToEncoder() { liftRunmode = "encoder"; }
-    public void setLiftModeToManual() { liftRunmode = "manual"; }
-
-    public String getLiftOperationMode() {
-        return liftRunmode;
-    }
-
-    public void moveLift(double speed) {
-        lifted.setPower(speed);
-    }
-    public void lowerLift(double speed) {
-        if (lifted.getCurrentPosition() > liftLowerLimit) {
-            lifted.setPower(speed);
-        } else {
-            lifted.setPower(0);
-        }
-    }
-    public void raiseLift(double speed) {
-        if (lifted.getCurrentPosition() < liftUpperLimit) {
-            lifted.setPower(speed);
-        } else {
-            lifted.setPower(0);
+            actuator.setPower(0);
         }
     }
-    public void stopLift() {
-        lifted.setPower(0);
+    public void moveActuatorOut(double speed) {
+        if (actuator.getCurrentPosition() < actuatorOuterLimit) {
+            actuator.setPower(speed);
+        } else {
+            actuator.setPower(0);
+        }
+    }
+    public void actuatorFullRetract(){
+        currentActuatorTarget = actuatorInnerLimit;
+        actuator.setTargetPosition(actuatorInnerLimit);
+        actuatorTargetDirection = "IN";
+        actuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+    public void actuatorFullExtend(){
+        currentActuatorTarget = actuatorOuterLimit;
+        actuator.setTargetPosition(actuatorOuterLimit);
+        actuatorTargetDirection = "OUT";
+        actuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+    public void actuatorToMiddle(){
+        currentActuatorTarget = actuatorMiddlePosition;
+        actuator.setTargetPosition(actuatorMiddlePosition);
+        if(actuator.getCurrentPosition() > actuatorMiddlePosition) {
+            actuatorTargetDirection = "IN";
+        } else {
+            actuatorTargetDirection = "OUT";
+        }
+        actuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+    public void stopActuator() {
+        actuator.setPower(0);
     }
 
-    //Use after running to position to reset runmode
-    public void liftRunWithEncoders() {
-        lifted.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public void runActuatorWithEncoder(){actuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);}
+
+    public int getActuatorPosition() { return actuator.getCurrentPosition(); }
+    public int getCurrentActuatorTarget() { return currentActuatorTarget; }
+    public String getActuatorTargetDirecton() {
+        return actuatorTargetDirection;
     }
 
-    public double getEncodedLift(){
-        return lifted.getCurrentPosition();
-    }
-    public int getCurrentLiftTarget() { return currentLiftTarget; }
-    public String getLiftMotorRunmode() {
-        return lifted.getMode().toString();
-    }
-    public String getLiftTargetDirecton() {
-        return liftTargetDirecton;
-    }
-    public void liftToBottom(boolean right_bumper) {
-        liftTargetDirecton = "down";
-        currentLiftTarget = liftGroundEncoderValue;
-        lifted.setTargetPosition(currentLiftTarget);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void liftToMiddle() {
-        liftTargetDirecton = "up";
-        currentLiftTarget = liftMiddleLevelEncoderValue;
-        lifted.setTargetPosition(currentLiftTarget);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void upOnePixelFlat() {
-        liftTargetDirecton = "up";
-        currentLiftTarget = lifted.getCurrentPosition() + pixelEncoderValueFlat;
-        lifted.setTargetPosition(currentLiftTarget);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-    }
-    public void upOnePixelUpright() {
-        liftTargetDirecton = "up";
-        currentLiftTarget = lifted.getCurrentPosition() + pixelEncoderValueUpright;
-        lifted.setTargetPosition(currentLiftTarget);
-        lifted.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-    }
-
-
-    public  boolean liftBusy() { return  lifted.isBusy(); }
-
-    public void runClimber(double speed) {
+    //Chain Methods
+    //Only in test mode, no limit
+    public void runChain(double speed) {
         double s = Range.clip(speed, -1, 1);
-        climber.setPower(s);
+        chain.setPower(s);
     }
-   /* public void setLiftclimber(double speed) {
-        liftclimber.setPower(speed * .5);
+    public void moveChainDown(double speed) {
+        if (chain.getCurrentPosition() > chainLowerLimit) {
+            chain.setPower(speed);
+        } else {
+            chain.setPower(0);
+        }
     }
-*/
-    public void runClimberToTop() {
-        climber.setTargetPosition(climberTopPosition);
-        climber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    public void moveChainUp(double speed) {
+        if (chain.getCurrentPosition() < chainUpperLimit) {
+            chain.setPower(speed);
+        } else {
+            chain.setPower(0);
+        }
     }
-    public void climberRunWithEncoders() {
-        climber.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void runLiftClimberToTop() {
-        liftclimber.setTargetPosition(climberLiftTopPosition);
-        liftclimber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    public void climberLiftRunWithEncoders() { liftclimber.setMode(DcMotor.RunMode.RUN_USING_ENCODER); }
 
-    public int getClimberTopPosition() { return climberTopPosition; }
-    public int getClimberLiftTopPosition() { return climberLiftTopPosition; }
-    public int getClimberPosition() { return climber.getCurrentPosition(); }
-    public int getLiftClimberPosition() { return liftclimber.getCurrentPosition(); }
+    public void runChainWithEncoder(){chain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);}
+
+    public void moveToGrabPosition() {
+        openGripper();
+        gripperGrabPosition();
+        currentChainTarget = chainGroundPosition;
+        chain.setTargetPosition(chainGroundPosition);
+        if(chain.getCurrentPosition() > chainGroundPosition) {
+            chainTargetDirecton = "DOWN";
+        } else {
+            chainTargetDirecton = "UP";
+        }
+        chain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        actuatorFullExtend();
+
+    }
+
+    public void moveToTransitPosition() {
+        closeGripper();
+        gripperInnerPosition();
+        currentChainTarget = chainGroundPosition + 50;
+        chain.setTargetPosition(chainGroundPosition + 50);
+        if(chain.getCurrentPosition() > (chainGroundPosition + 50)) {
+            chainTargetDirecton = "DOWN";
+        } else {
+            chainTargetDirecton = "UP";
+        }
+        actuatorFullRetract();
+        chain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+    public void moveToTransitPositionAuto() {
+        closeGripper();
+        gripperGrabPosition();
+        currentChainTarget = chainGroundPosition + 55;
+        chain.setTargetPosition(chainGroundPosition + 55);
+        if(chain.getCurrentPosition() > (chainGroundPosition + 55)) {
+            chainTargetDirecton = "DOWN";
+        } else {
+            chainTargetDirecton = "UP";
+        }
+        actuatorFullRetract();
+        chain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+
+    public void moveToPlacePosition() {
+        currentChainTarget = chainPlacePosition;
+        chain.setTargetPosition(chainPlacePosition);
+        if(chain.getCurrentPosition() > chainPlacePosition) {
+            chainTargetDirecton = "DOWN";
+        } else {
+            chainTargetDirecton = "UP";
+        }
+        chain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        actuatorToMiddle();
+        gripperPlacePosition();
+        closeGripper();
+    }
+
+    public void moveToClimbPosition() {
+        closeGripper();
+        gripperInnerPosition();
+        chain.setTargetPosition(chainClimbPosition);
+        currentChainTarget = chainClimbPosition;
+        if(chain.getCurrentPosition() > chainClimbPosition) {
+            chainTargetDirecton = "DOWN";
+        } else {
+            chainTargetDirecton = "UP";
+        }
+        actuatorFullExtend();
+        chain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+
+    public int getChainPosition() { return chain.getCurrentPosition(); }
+    public int getCurrentChainTarget() { return currentChainTarget; }
+    public String getChainTargetDirecton() {
+        return chainTargetDirecton;
+    }
 
 
     public void printIntakeTelemetry(Telemetry t) {
-        t.addData("Lift Encoder Value", lifted.getCurrentPosition());
-        t.addData("Lift Runmode", getLiftMotorRunmode());
-        t.addData("Lift Op Mode", liftRunmode);
-        t.addData("Lift Target Position", currentLiftTarget);
-        t.addData("Lift Target Direction", liftTargetDirecton);
+        t.addData("Actuator Encoder Value", actuator.getCurrentPosition());
+        t.addData("Actuator Target Position", currentActuatorTarget);
+        t.addData("Actuator Target Direction", actuatorTargetDirection);
 
-        t.addData("Climber Encoder Value", climber.getCurrentPosition());
-        t.addData("Climb Lifter Encoder Value", liftclimber.getCurrentPosition());
+        t.addData("Chain Encoder Value", chain.getCurrentPosition());
+        t.addData("Chain Target Position", currentChainTarget);
+        t.addData("Chain Target Direction", chainTargetDirecton);
 
         t.addData("Gripper Open", gripperOpen);
     }
 
-
-    public String getLiftLevel() {
-        return null;
-    }
 }

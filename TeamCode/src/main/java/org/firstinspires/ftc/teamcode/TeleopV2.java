@@ -118,21 +118,22 @@ public class TeleopV2 extends OpMode {
             intake.openGripper();
 
         }
-        if(gamepad2.b){
+        if(gamepad2.b) {
             intake.closeGripper();
         }
-        if(gamepad2.x) {
-            intake.gripperDown();
 
-        }
-        if(gamepad2.y){
-            intake.gripperUp();
-        }
+        //if(gamepad2.x) {
+            //intake.gripperDown();
 
 
-        intake.runClimber(-gamepad2.right_stick_y);
+        //if(gamepad2.y){
+            //intake.gripperUp();
 
-        intake.moveLift(-gamepad2.left_stick_y);
+
+
+        intake.runChain(-gamepad2.right_stick_y);
+
+      //  intake.moveLift(-gamepad2.left_stick_y);
 
         //intake.liftToBottom(gamepad2.dpad_right);
 /*
@@ -168,7 +169,7 @@ public class TeleopV2 extends OpMode {
 
         telemetry.addData("Trigger Value - r", gamepad2.right_trigger);
         telemetry.addData("Trigger Value - l", gamepad2.left_trigger);
-        telemetry.addData("Slide", intake.getEncodedLift());
+        //telemetry.addData("Slide", intake.getEncodedLift());
 
 
         //intake.printIntakeTelemetry(telemetry);

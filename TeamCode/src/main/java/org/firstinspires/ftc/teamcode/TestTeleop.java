@@ -94,22 +94,6 @@ public class TestTeleop extends OpMode {
         //Get gyro reading
         //angles = sensors.readGyroAngle();
 
-        intake.moveLift(-gamepad2.left_stick_y);
-
-        if(gamepad2.a) {
-            intake.openGripper();
-
-        }
-        if(gamepad2.b){
-            intake.closeGripper();
-        }
-        if(gamepad2.x) {
-            intake.gripperDown();
-
-        }
-        if(gamepad2.y){
-            intake.gripperUp();
-        }
 
 
 

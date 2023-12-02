@@ -40,8 +40,8 @@ public class Drive {
 
     //Encoders--Use the rear encoders only
     public void runUsingEncoders() {
-        rr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       rr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       lr_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rf_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

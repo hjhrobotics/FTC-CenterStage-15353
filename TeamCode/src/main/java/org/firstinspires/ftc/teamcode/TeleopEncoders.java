@@ -29,25 +29,25 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 //@Autonomous(name="Auto Test", group="Iterative Opmode")
-@TeleOp(name="Teleop-v1", group="Iterative Opmode")
-@Disabled
-public class TeleopV1 extends OpMode {
+@TeleOp(name="Teleop-Encoders", group="Iterative Opmode")
+//@Disabled
+public class TeleopEncoders extends OpMode {
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    //private ElapsedTime runtime = new ElapsedTime();
     private Drive drive;
     private Sensors sensors;
-    private Intake intake;
+   private Intake intake;
     private Vision vision;
 
     private Orientation angles = null;
+
+    private int intakeCase = 1;
 
 
     /*
@@ -59,8 +59,8 @@ public class TeleopV1 extends OpMode {
 
         drive = new Drive(hardwareMap);
         sensors = new Sensors(hardwareMap);
-        intake = new Intake(hardwareMap);
-        vision = new Vision();
+       intake = new Intake(hardwareMap);
+       vision = new Vision();
 
         try {
             sensors.initGyro();
@@ -68,6 +68,7 @@ public class TeleopV1 extends OpMode {
         } catch (Exception e) {
             telemetry.addData("Gyro", "Error: " + e.toString());
         }
+
 
     }
 
@@ -83,7 +84,7 @@ public class TeleopV1 extends OpMode {
      */
     @Override
     public void start() {
-        runtime.reset();
+        //runtime.reset();
     }
 
     /*
@@ -114,47 +115,119 @@ public class TeleopV1 extends OpMode {
             drive.straightDrive(-.3);
         }
 
-        if(gamepad2.a) {
+       if(gamepad2.a) {
             intake.openGripper();
 
         }
-        if(gamepad2.b){
+        if(gamepad2.b) {
             intake.closeGripper();
         }
-        
-
-        intake.runChain(-gamepad2.right_stick_y);
-
-/*
-        if(gamepad2.left_stick_y < -.15) {
-            intake.raiseLift(-gamepad2.left_stick_y);
-        } else if(gamepad2.left_stick_y > .15) {
-            intake.lowerLift(-gamepad2.left_stick_y);
-        } else {
-            intake.moveLift(0);
+        if(gamepad2.x){
+            intake.gripperGrabPosition();
         }
-*/
-
-
-/*
-        if(gamepad2.left_trigger > .08) {
-            intake.setLiftclimber(-gamepad2.left_trigger);
-        } else if(gamepad2.right_trigger > .08) {
-            intake.setLiftclimber(gamepad2.right_trigger);
-        } else {
-            intake.setLiftclimber(0);
+        if(gamepad2.y) {
+            intake.gripperPlacePosition();
         }
 
-*/
+        switch(intakeCase) {
+            case 1:
+                //Pick Up
+                if(gamepad2.dpad_right) {
+                    intake.moveToGrabPosition();
+                    intakeCase = 2;
+                }
+                //Place position
+                if(gamepad2.dpad_up) {
+                    intake.moveToPlacePosition();
+                    intakeCase = 2;
+                }
+                //collapse
+                if(gamepad2.dpad_down) {
+                    intake.moveToTransitPosition();
+                    intakeCase = 2;
+                }
+                //climb
+                if(gamepad2.left_bumper) {
+                    intake.moveToClimbPosition();
+                    intakeCase = 2;
+                }
+
+                intake.runChain(-gamepad2.right_stick_y);
+                if(gamepad2.left_stick_y > .1) {
+                    //actuator in
+                    intake.moveActuatorIn(-gamepad2.left_stick_y);
+
+                } else if(gamepad2.left_stick_y < -.1) {
+                    //actuator out
+                    intake.moveActuatorOut(-gamepad2.left_stick_y);
+                } else {
+                    intake.stopActuator();
+                }
+                break;
+            case 2:
+                //move actuator
+                if(intake.getActuatorTargetDirecton() == "IN") {
+                    intake.moveActuatorIn(-.5);
+                    if(intake.getActuatorPosition() < intake.getCurrentActuatorTarget()) {
+                        intake.stopActuator();
+                        intakeCase = 3;
+                    }
+                } else if(intake.getActuatorTargetDirecton() == "OUT"){
+                    intake.moveActuatorOut(.5);
+                    if(intake.getActuatorPosition() > intake.getCurrentActuatorTarget()) {
+                        intake.stopActuator();
+                        intakeCase = 3;
+                    }
+                } else {
+                    intake.stopActuator();
+                    intakeCase = 3;
+                }
+
+
+
+                break;
+            case 3:
+                if(intake.getChainTargetDirecton() == "UP") {
+                    intake.runChain(.5);
+                    if(intake.getChainPosition() > intake.getCurrentChainTarget()) {
+                        intake.runChain(0);
+                        intakeCase = 4;
+                    }
+                } else if(intake.getChainTargetDirecton() == "DOWN") {
+                    intake.runChain(-.5);
+                    if(intake.getChainPosition() < intake.getCurrentChainTarget()) {
+                        intake.runChain(0);
+                        intakeCase = 4;
+                    }
+                } else {
+                    intake.runChain(0);
+                    intakeCase = 4;
+                }
+
+                break;
+            case 4:
+                intake.runActuatorWithEncoder();
+                intake.runChainWithEncoder();
+                intakeCase = 1;
+                break;
+            default:
+                break;
+
+        }
+
+
+
+
+
+
 
         //Get gyro reading
         angles = sensors.readGyroAngle();
 
 
-        telemetry.addData("Gyro", sensors.getGyroZ(angles));
-
-        drive.printDriveTelemetry(telemetry);
         intake.printIntakeTelemetry(telemetry);
+        telemetry.addData("Intake Case", intakeCase);
+        telemetry.addData("Gyro", sensors.getGyroZ(angles));
         telemetry.update();
 
 

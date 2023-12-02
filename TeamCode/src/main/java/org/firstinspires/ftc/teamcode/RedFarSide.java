@@ -35,9 +35,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@Autonomous(name="Blue-BoardSide", group="Iterative Opmode")
+@Autonomous(name="Red-FarSide", group="Iterative Opmode")
 //@Disabled
-public class BlueBoardSide extends OpMode {
+public class RedFarSide extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drive drive;
@@ -68,6 +68,7 @@ public class BlueBoardSide extends OpMode {
         intake = new Intake(hardwareMap);
         vision = new Vision();
 
+        intake.closeGripper();
 
         try {
             sensors.initGyro();
@@ -115,17 +116,17 @@ public class BlueBoardSide extends OpMode {
 
         switch (autoCase) {
             case 1:
-                //Drive forward to prep to place
+                //Drive backwards to prep to place
 
-                leftEncoderTarget = 900;
-                rightEncoderTarget = 900;
+                leftEncoderTarget = -1300;
+                rightEncoderTarget = -1300;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 2;
                 break;
             case 2:
-                drive.straightDrive(.5);
-                if(drive.getRightEncoderValue() >= rightEncoderTarget && drive.getLeftEncoderValue() >= leftEncoderTarget) {
+                drive.straightDrive(-.5);
+                if(drive.getRightEncoderValue() <= rightEncoderTarget && drive.getLeftEncoderValue() <= leftEncoderTarget) {
                     drive.straightDrive(0);
                     commandStartTime = runtime.seconds() + 1;
                     autoCase = 3;
@@ -138,7 +139,6 @@ public class BlueBoardSide extends OpMode {
                     if (markerLocation == "CENTER") {
                         //Already at the center, continue
                         intake.openRightGripper();
-                        commandStartTime = runtime.seconds() + 1;
                         autoCase = 4;
 
                     } else if (markerLocation == "RIGHT") {
@@ -150,7 +150,6 @@ public class BlueBoardSide extends OpMode {
                     }
                 }
                 break;
-
             case 4:
                 //chill for a sec
                 if(runtime.seconds() > commandStartTime) {
@@ -159,9 +158,9 @@ public class BlueBoardSide extends OpMode {
                 }
                 break;
             case 5:
-                //Back up a bit
-                leftEncoderTarget = drive.getLeftEncoderValue() - 300;
-                rightEncoderTarget = drive.getRightEncoderValue() - 300;
+                //Back up a bit to line up with truss opening
+                leftEncoderTarget = drive.getLeftEncoderValue() - 400;
+                rightEncoderTarget = drive.getRightEncoderValue() - 400;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 6;
@@ -169,6 +168,42 @@ public class BlueBoardSide extends OpMode {
             case 6:
                 drive.straightDrive(-.5);
                 if(drive.getRightEncoderValue() <= rightEncoderTarget && drive.getLeftEncoderValue() <= leftEncoderTarget) {
+                    drive.straightDrive(0);
+                    autoCase = 601;
+                }
+                break;
+
+            case  601:
+                //Turn to face the board
+                //Set gyro Target
+                gyroTarget = 65;
+                drive.tankDrive(-.4, .4);
+                if(sensors.getGyroZ(angles) >= gyroTarget) {
+                    autoCase = 602;
+                }
+                break;
+            case 602:
+                //move under truss - set encoder targets
+                leftEncoderTarget = drive.getLeftEncoderValue() + 2500;
+                rightEncoderTarget = drive.getRightEncoderValue() + 2500;
+                drive.leftEncoderToPosition(leftEncoderTarget);
+                drive.rightEncoderToPosition(rightEncoderTarget);
+                //set wait time to avoid collision
+                commandStartTime = runtime.seconds() + 5;
+                autoCase = 603;
+                break;
+            case 603:
+                //Wait to be sure we dont hit another robot
+                //wait time is set in 602
+                if(runtime.seconds() > commandStartTime) {
+                    commandStartTime = runtime.seconds() + 1;
+                    autoCase = 604;
+                }
+                break;
+            case 604:
+                //drive under truss
+                drive.straightDrive(.5);
+                if(drive.getRightEncoderValue() >= rightEncoderTarget && drive.getLeftEncoderValue() >= leftEncoderTarget) {
                     drive.straightDrive(0);
                     autoCase = 7;
                 }
@@ -191,51 +226,20 @@ public class BlueBoardSide extends OpMode {
                 intake.moveActuatorOut(.6);
                 if(intake.getActuatorPosition() > intake.getCurrentActuatorTarget()) {
                     intake.stopActuator();
+                    commandStartTime = runtime.seconds() + 1;
                     autoCase = 8;
                 }
                 break;
-            case  8:
-                //Turn to face the board
-                //Set gyro Target
-                gyroTarget = 55;
-                drive.tankDrive(-.4, .4);
-                if(sensors.getGyroZ(angles) > gyroTarget) {
-                    //case 100 is the finish of the process
-                    autoCase = 100;
-                }
-                break;
-        //************************************** Start of Right ********************************
-            case 20:
-                autoCase = 21;
-                break;
-        //************************************** Start of Left  ********************************
-            case 30:
-                autoCase = 31;
-                break;
-        //************************************** Start of Final process to place ********************************
-            case 100:
-                //set board target, square up to board
-                leftEncoderTarget = drive.getLeftEncoderValue() + 950;
-                rightEncoderTarget = drive.getRightEncoderValue() + 1350;
-                drive.leftEncoderToPosition(leftEncoderTarget);
-                drive.rightEncoderToPosition(rightEncoderTarget);
-                autoCase = 101;
-                break;
-            case 101:
-                //Drive to the board, set the lift target for middle when done
-                drive.tankDrive(.4, .45);
-                if(drive.getRightEncoderValue() >= rightEncoderTarget && drive.getLeftEncoderValue() >= leftEncoderTarget) {
-                    drive.straightDrive(0);
+            case 8:
+                //strafe to line up with board for time specified above
+                drive.strafe(.6);
+                if(runtime.seconds() > commandStartTime) {
+                    drive.strafe(0);
                     autoCase = 102;
                 }
                 break;
+
             case 102:
-                //Wait for a bit to let the gripper get up
-                if(runtime.seconds() >  commandStartTime) {
-                    autoCase = 124;
-                }
-                break;
-            case 124:
                 //Move to board -- set targets
                 leftEncoderTarget = drive.getLeftEncoderValue() + 13;
                 rightEncoderTarget = drive.getRightEncoderValue() + 15;
@@ -279,7 +283,7 @@ public class BlueBoardSide extends OpMode {
                 }
                 break;
             case 129:
-                //Move to prep for teleop
+                //Lift and gripper down to start teleop
                 intake.moveToTransitPosition();
                 autoCase = 130;
                 break;
@@ -296,19 +300,22 @@ public class BlueBoardSide extends OpMode {
                 intake.moveActuatorIn(-.6);
                 if(intake.getActuatorPosition() < intake.getCurrentActuatorTarget()) {
                     intake.stopActuator();
-                    autoCase = 132;
+                    //Just stop here for now, can add a turn if needed
+                    autoCase = 999;
                 }
                 break;
             case 132:
                 drive.tankDrive(0, -.8);
                 if(sensors.getGyroZ(angles) <= -67) {
                     drive.tankDrive(0, 0);
-                    autoCase = 999;
+                    autoCase = 132;
                 }
                 break;
+
+
             default:
                 drive.teleopDrive(0, 0);
-               // intake.moveLift(0);
+               //intake.moveLift(0);
                 break;
 
         }

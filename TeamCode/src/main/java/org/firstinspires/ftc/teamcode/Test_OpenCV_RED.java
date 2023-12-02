@@ -125,7 +125,7 @@ public class Test_OpenCV_RED extends OpMode {
 
             default:
                 drive.teleopDrive(0, 0);
-                intake.moveLift(0);
+              //  intake.moveLift(0);
                 break;
 
         }
@@ -135,9 +135,9 @@ public class Test_OpenCV_RED extends OpMode {
 
         telemetry.addData("Gyro Z", sensors.getGyroZ(angles));
 
-        telemetry.addData("Lift Pos", intake.getEncodedLift());
-        telemetry.addData("Lift Busy", intake.liftBusy());
-        telemetry.addData("Lift Level", intake.getLiftLevel());
+      //  telemetry.addData("Lift Pos", intake.getEncodedLift());
+      //  telemetry.addData("Lift Busy", intake.liftBusy());
+      //  telemetry.addData("Lift Level", intake.getLiftLevel());
         telemetry.addData("LR Position", drive.getLeftEncoderValue());
         telemetry.addData("LR Drive Busy", drive.leftMotorBusy());
         telemetry.addData("LR Position", drive.getRightEncoderValue());
