@@ -17,6 +17,7 @@ public class Intake {
     private Servo gripper = null; //Left Servo
     private Servo gripper2 = null; //RightServo
     private Servo intakeRotateServo = null;
+    private Servo PlaneShooter = null;
 
     // -- Subsystem Variables ---
 
@@ -30,12 +31,12 @@ public class Intake {
 
     // Encoder Values used to limit lift from going too high or too low
     //2023 Values, 2 stages, 117rpm motor
-    private int actuatorMiddlePosition = 1500;
+    private int actuatorMiddlePosition = 2000;
     private int actuatorInnerLimit = 175;
-    private int actuatorOuterLimit = 2350;
+    private int actuatorOuterLimit = 2500;
 
     private int chainGroundPosition = 0;
-    private int chainPlacePosition = 2175;
+    private int chainPlacePosition = 2000;
     private int chainClimbPosition = 3609;
 
     private int chainUpperLimit = 0;
@@ -46,7 +47,7 @@ public class Intake {
     private double rightServoGripPosition = 1;
     private double rightServoReleasePosition = .7;
     private double rotateServoInPosition = .66;
-    private double rotateServoGrabPosition = .66;
+    private double rotateServoGrabPosition = .68;
     private double rotateServoPlacePosition = .58;
 
 
@@ -58,6 +59,7 @@ public class Intake {
         gripper = h.get(Servo.class, "gripper");
         gripper2 = h.get(Servo.class, "Gripper2");
         intakeRotateServo = h.get(Servo.class, "intakeRotate");
+        PlaneShooter = h.get(Servo.class, "PlaneShooter");
 
         actuator = h.get(DcMotor.class, "actuator");
         chain = h.get(DcMotor.class, "chain");
@@ -95,6 +97,12 @@ public class Intake {
     public void openRightGripper() {
         gripper2.setPosition(rightServoReleasePosition);
         gripperOpen = true;
+    }
+    public void ShootPlane() {
+        PlaneShooter.setPosition(0);
+    }
+    public void ResetPlane() {
+        PlaneShooter.setPosition(.5);
     }
 
     public void gripperPlacePosition() {

@@ -61,6 +61,7 @@ public class TeleopEncoders extends OpMode {
         sensors = new Sensors(hardwareMap);
        intake = new Intake(hardwareMap);
        vision = new Vision();
+       intake.ResetPlane();
 
         try {
             sensors.initGyro();
@@ -128,10 +129,13 @@ public class TeleopEncoders extends OpMode {
         if(gamepad2.y) {
             intake.gripperPlacePosition();
         }
+        if(gamepad1.dpad_right){
+            intake.ShootPlane();
+        }
 
         switch(intakeCase) {
             case 1:
-                //Pick Up
+             /*   //Pick Up
                 if(gamepad2.dpad_right) {
                     intake.moveToGrabPosition();
                     intakeCase = 2;
@@ -146,6 +150,8 @@ public class TeleopEncoders extends OpMode {
                     intake.moveToTransitPosition();
                     intakeCase = 2;
                 }
+
+              */
                 //climb
                 if(gamepad2.left_bumper) {
                     intake.moveToClimbPosition();

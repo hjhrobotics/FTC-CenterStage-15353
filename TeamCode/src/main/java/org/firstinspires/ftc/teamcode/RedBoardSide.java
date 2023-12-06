@@ -231,8 +231,8 @@ public class RedBoardSide extends OpMode {
 
             case 102:
                 //Move to board -- set targets
-                leftEncoderTarget = drive.getLeftEncoderValue() + 140;
-                rightEncoderTarget = drive.getRightEncoderValue() + 140;
+                leftEncoderTarget = drive.getLeftEncoderValue() + 290;
+                rightEncoderTarget = drive.getRightEncoderValue() + 270;
                 drive.leftEncoderToPosition(leftEncoderTarget);
                 drive.rightEncoderToPosition(rightEncoderTarget);
                 autoCase = 125;
@@ -290,15 +290,20 @@ public class RedBoardSide extends OpMode {
                 intake.moveActuatorIn(-.6);
                 if(intake.getActuatorPosition() < intake.getCurrentActuatorTarget()) {
                     intake.stopActuator();
+
                     autoCase = 131;
                 }
                 break;
             case 132:
-                drive.tankDrive(-.8, 0);
-                if(sensors.getGyroZ(angles) <= 67) {
-                    drive.tankDrive(0, 0);
-                    autoCase = 132;
+                commandStartTime = runtime.seconds() + 2;
+
+                autoCase = 133;
+            case 133:
+                drive.strafe(.1);
+                if(runtime.seconds() > commandStartTime) {
+                    drive.strafe(0);
                 }
+
                 break;
 
 
